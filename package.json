@@ -3,15 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bip39": "^2.5.0",
+    "bn.js": "^4.11.8",
+    "bootstrap": "^4.3.1",
+    "commander": "^2.18.0",
+    "ethereumjs-tx": "^1.3.7",
+    "ethereumjs-wallet": "^0.6.2",
+    "loom-js": "1.38.0",
+    "loom-truffle-provider": "^0.11.0",
+    "openzeppelin-solidity": "^2.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "2.1.8"
+    "react-scripts": "2.1.8",
+    "reactstrap": "^7.1.0",
+    "truffle-hdwallet-provider": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:reset": "truffle deploy --reset --network loom_dapp_chain",
+    "deploy": "truffle deploy --network loom_dapp_chain",
+    "deploy:extdev": "truffle deploy --network extdev_plasma_us1",
+    "deploy:reset:extdev": "truffle deploy --reset --network extdev_plasma_us1",
+    "deploy:rinkeby": "truffle deploy --network rinkeby",
+    "deploy:reset:rinkeby": "truffle deploy --reset --network rinkeby",
+    "test": "truffle test --network loom_dapp_chain",
+    "test:extdev": "truffle test --network extdev_plasma_us1",
+    "serve": "webpack-dev-server --hot --content-base ./dist",
+    "serve:extdev": "NETWORK=extdev yarn run serve",
+    "gen:rinkeby-key": "node ./scripts/gen-eth-key.js rinkeby"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,68 +1,93 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Truffle DappChain Example
 
-## Available Scripts
+Simple example of Truffle interacting with Loom DappChain, this example uses [loom-truffle-provider](https://github.com/loomnetwork/loom-truffle-provider) (check LoomTruffleProvider repository for more details)
 
-In the project directory, you can run:
+![](https://dzwonsemrish7.cloudfront.net/items/0a1N05043p1Y1G3K1Y2L/Screen%20Recording%202018-07-17%20at%2011.26%20AM.gif?v=df873ac3)
 
-### `npm start`
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Requirements
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+```bash
+Node >= 8
+```
 
-### `npm test`
+## Install
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+In order to download the Truffle DAppChain Example, you should follow these steps:
 
-### `npm run build`
+```bash
+git clone https://github.com/loomnetwork/truffle-dappchain-example
+```
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cd truffle-dappchain-example
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+yarn install
+# or
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Start DappChain
 
-### `npm run eject`
+```bash
+# Download
+curl https://raw.githubusercontent.com/loomnetwork/loom-sdk-documentation/master/scripts/get_loom.sh | sh
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# Run
+./loom init
+./loom run
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Deploy Truffle
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```bash
+# On second terminal
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# Deploy Migrations.sol and SimpleStore.sol
+yarn deploy
 
-## Learn More
+# Running test on directory /test
+yarn test
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+> In order to correctly redeploy the contracts there's a command "yarn deploy:reset"
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> Also is possible to call truffle command directly by call "yarn truffle"
 
-### Code Splitting
+> We're not versioning the build directory for this particular example, although is recommended to versioning, the limitation can be removed by editing .gitignore
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+## Web interface
 
-### Analyzing the Bundle Size
+The web interface is build with React using webpack to compile and generate the page
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+```bash
 
-### Making a Progressive Web App
+# On a third terminal
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+yarn serve
+```
 
-### Advanced Configuration
+Or run this command to send transactions to the contract deployed on testnet (requires `yarn deploy:extdev`)
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+```bash
 
-### Deployment
+# On a third terminal
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+yarn serve:extdev
+```
 
-### `npm run build` fails to minify
+The web interface will be available on http://localhost:8080
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+## Current limitations
+
+* Events declared on smart contracts should have an named parameter like `NewValueSet(uint _value)` in the contract `SimpleStore.sol`. Also it helps to dealing with events
+
+Loom Network
+----
+[https://loomx.io](https://loomx.io)
+
+
+License
+----
+
+BSD 3-Clause License
