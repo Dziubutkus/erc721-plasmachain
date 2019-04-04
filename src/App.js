@@ -152,25 +152,6 @@ class App extends Component {
                     </FormGroup>
                     <Button outline color="success">Withdraw</Button>{' '}
                 </Form>
-
-                {/*
-        <form onSubmit={e => { e.preventDefault(); }}>
-          <div className="form-group">
-            <label>Value</label>
-            <input type="number" className="form-control" onChange={(event) => this.onChangeHandler(event)} ref={this.textInput}/>
-            <small className="form-text text-muted">Set a number</small>
-          </div>
-          <button type="button" disabled={!this.state.isValid || this.state.isSending} className="btn btn-primary" onClick={() => this.confirmValue()}>Confirm</button>
-        </form>
-        <div className="alert alert-success">
-          Value set is {this.state.value} (this value only updates if values is 10 or ...)
-        </div>
-        { this.state.tries === 3 && loomyAlert }
-        <hr />
-        <pre>
-          {this.state.tx && JSON.stringify(this.state.tx, null, 2)}
-        </pre>
-        */}
             </Container>
         )
     }
