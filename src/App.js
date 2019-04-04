@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Contract from './contract'
-import { Button, Form, Input, FormGroup, Alert, Container} from 'reactstrap'
+import { Button, Form, Input, FormGroup, Container, Row, Col} from 'reactstrap'
 import RinkebyToken from './contracts/MyRinkebyToken.json'
 import Web3 from 'web3'
 
@@ -10,7 +10,7 @@ class App extends Component {
     constructor(props) {
         super(props)
 
-        this.textInput = React.createRef();
+        this.tokenId = React.createRef();
 
         this.contract = new Contract()
         this.value = 0
@@ -68,39 +68,54 @@ class App extends Component {
     }
 
     mintToken = async event => {
-        console.log("in mintToken")
         const tokenId = await window.rinkebyToken.methods.totalSupply().call()
-        console.log("tokenId is", parseInt(tokenId))
         const gasEstimate = await window.rinkebyToken.methods.mint(tokenId).estimateGas({ from: this.state.address })
-        console.log("Gas estimate:", parseInt(gasEstimate))
         await window.rinkebyToken.methods.mint(tokenId).send({ from: this.state.address, gas: gasEstimate })
-        console.log("duxas ismintino")
+        await this.loadTokenBalance()
+    }
+
+    depositToGateway = async event => {
+        event.preventDefault()
+        console.log("In depositToGateway")
+        let tokenId = event.target.elements[0].value
+        const gasEstimate = await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).estimateGas({ from: this.state.address })
+        await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).send({ from: this.state.address, gas: gasEstimate })
         await this.loadTokenBalance()
     }
 
     render() {
         return (
-            <div className="container" style={{ marginTop: 10 }}>
-                <div>
-                    <h1>Ethereum</h1>
-                    <p>Your Address: { this.state.address }</p>
-                    <p>Balance: { this.state.tokens }</p>
-                    <Form>
-                        <FormGroup onSubmit={e => { e.preventDefault(); }}>
-                            <Input type="text" name="text" placeholder="Enter address" />
-                        </FormGroup>
-                        <Button outline color="success"
-                                onClick={() => this.mintToken()}>
-                            Mint
-                        </Button>
-                    </Form>
-                    <Form onSubmit={e => { e.preventDefault(); }}>
-                        <FormGroup>
-                            <Input type="text" name="text" id="depositToken" placeholder="Enter token id" />
-                        </FormGroup>
-                        <Button outline color="warning">Deposit</Button>{' '}
-                    </Form>
-                </div>
+            <Container>
+                <Row>
+                    <Col>
+                        <h1>Ethereum</h1>
+                        <p>Your Address: { this.state.address }</p>
+                        <p>Balance: { this.state.tokens }</p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form onSubmit={e => { e.preventDefault(); }}>
+                            <FormGroup>
+                                <Input type="text" name="text" id="withdrawToken" placeholder="Enter token id" />
+                            </FormGroup>
+                            <Button outline color="success" onClick={() => this.mintToken()}>
+                                Mint
+                            </Button>
+                        </Form>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form onSubmit={(event) => this.depositToGateway(event) }>
+                            <FormGroup>
+                                <Input type="text" name="text" id="depositToken" placeholder="Enter token id" />
+                            </FormGroup>
+                            <Button outline color="warning"
+                                    >Deposit to Gateway</Button>
+                        </Form>
+                    </Col>
+                </Row>
 
                 <hr />
 
@@ -134,7 +149,7 @@ class App extends Component {
           {this.state.tx && JSON.stringify(this.state.tx, null, 2)}
         </pre>
         */}
-            </div>
+            </Container>
         )
     }
 }
