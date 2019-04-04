@@ -22,7 +22,8 @@ class App extends Component {
             tx: null,
             tries: 0,
             address: '',
-            tokens: []
+            tokens: [],
+            gatewayTokens: []
         }
 
         if (typeof web3 != 'undefined') {
@@ -52,7 +53,28 @@ class App extends Component {
                 this.setState({ tokens: "none" })
         }
         catch (error) {
-            console.warn("blet", error)
+            console.warn(error)
+        }
+    }
+
+    loadGatewayBalance = async event => {
+        try {
+            let total = await window.rinkebyToken.methods.balanceOf("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2").call()
+            console.warn("in load Gateway balance, total:", total.toString())
+            const tokens = []
+            for (let i = 0; i < Math.min(total, 5); i++) {
+                const tokenId = await window.rinkebyToken.methods
+                    .tokenOfOwnerByIndex("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", i)
+                    .call()
+                tokens.push(tokenId)
+            }
+            if (tokens.length !== 0)
+                this.setState({ gatewayTokens: tokens })
+            else
+                this.setState({ gatewayTokens: "none" })
+        }
+        catch (error) {
+            console.warn(error)
         }
     }
 
@@ -62,6 +84,7 @@ class App extends Component {
             console.log(accounts)
             this.setState({address: accounts[0]})
             await this.loadTokenBalance()
+            await this.loadGatewayBalance()
         } catch (error) {
             console.warn("caught", error)
         }
@@ -76,7 +99,6 @@ class App extends Component {
 
     depositToGateway = async event => {
         event.preventDefault()
-        console.log("In depositToGateway")
         let tokenId = event.target.elements[0].value
         const gasEstimate = await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).estimateGas({ from: this.state.address })
         await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).send({ from: this.state.address, gas: gasEstimate })
@@ -121,7 +143,7 @@ class App extends Component {
 
                 <div>
                     <h1>Loom Network / PlasmaChain</h1>
-                    <p>Balance: </p>
+                    <p>Gateway Balance: {this.state.gatewayTokens}</p>
                 </div>
 
                 <Form onSubmit={e => { e.preventDefault(); }}>
