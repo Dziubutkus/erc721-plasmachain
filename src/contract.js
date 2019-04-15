@@ -3,7 +3,7 @@ import {
 } from 'loom-js'
 
 import Web3 from 'web3'
-import RinkebyToken from './contracts/MyRinkebyToken.json'
+import MyToken from './contracts/MyToken.json'
 
 export default class Contract {
   async loadContract() {
@@ -45,14 +45,14 @@ export default class Contract {
 
   async _createContractInstance() {
     const networkId = await this._getCurrentNetwork()
-    this.currentNetwork = RinkebyToken.networks[networkId]
+    this.currentNetwork = MyToken.networks[networkId]
 
     if (!this.currentNetwork) {
       throw Error('Contract not deployed on DAppChain')
     }
 
-    const ABI = RinkebyToken.abi
-    this.rinkebyTokenInstance = new this.web3.eth.Contract(ABI, this.currentNetwork.address, {
+    const ABI = MyToken.abi
+    this.loomToken = new this.web3.eth.Contract(ABI, this.currentNetwork.address, {
       from: this.currentUserAddress
     })
 /*

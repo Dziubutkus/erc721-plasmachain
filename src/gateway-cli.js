@@ -9,13 +9,13 @@ const {
 } = require('loom-js')
 // TODO: fix this export in loom-js
 const { OfflineWeb3Signer } = require('loom-js/dist/solidity-helpers')
-const BN = require('bn.js')
+const BN = require('../node_modules/bn.js/lib/bn')
 
-const MyRinkebyTokenJSON = require('./src/contracts/MyRinkebyToken.json')
-const MyRinkebyCoinJSON = require('./src/contracts/MyRinkebyCoin.json')
-const MyTokenJSON = require('./src/contracts/MyToken.json')
-const MyCoinJSON = require('./src/contracts/MyCoin.json')
-const RinkebyGatewayJSON = require('./src/Gateway.json')
+const MyRinkebyTokenJSON = require('./contracts/MyRinkebyToken.json')
+const MyRinkebyCoinJSON = require('./contracts/MyRinkebyCoin.json')
+const MyTokenJSON = require('./contracts/MyToken.json')
+const MyCoinJSON = require('./contracts/MyCoin.json')
+const RinkebyGatewayJSON = require('./Gateway.json')
 
 const TransferGateway = Contracts.TransferGateway
 const AddressMapper = Contracts.AddressMapper

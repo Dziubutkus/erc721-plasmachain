@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Contract from './contract'
 import { Button, Form, Input, FormGroup, Container, Row, Col} from 'reactstrap'
@@ -12,7 +11,7 @@ class App extends Component {
 
         this.tokenId = React.createRef();
 
-        this.contract = new Contract()
+        this.loom = new Contract()
         this.value = 0
 
         this.state = {
@@ -23,28 +22,51 @@ class App extends Component {
             tries: 0,
             address: '',
             tokens: [],
-            gatewayTokens: []
+            gatewayTokens: [],
+            extdevTokens: []
         }
-
-        if (typeof web3 != 'undefined') {
-            this.web3Provider = window.web3.currentProvider;
-        } else {
-            this.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/aef1483094d34971a33968ea7819f8c1');
-        }
-        window.web3 = new Web3(this.web3Provider);
-        window.rinkebyToken = new window.web3.eth.Contract(RinkebyToken.abi, "0x8d7EAB5447bAdAd0cb016113394159faba7b7b18")
 
     }
 
-    loadTokenBalance = async event => {
+    async componentWillMount() {
         try {
-            let total = await window.rinkebyToken.methods.balanceOf(this.state.address).call()
+
+            if (typeof this.web3 != 'undefined') {
+                this.web3Provider = this.web3.currentProvider;
+            } else {
+                this.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/aef1483094d34971a33968ea7819f8c1');
+            }
+            this.web3 = new Web3(this.web3Provider);
+
+            this.rinkebyToken = new this.web3.eth.Contract(RinkebyToken.abi, "0x2ADf9D1CD5E7D90c135936228dE8118DB912BaFc")
+            await this.loom.loadContract()
+            console.log(this.web3)
+            const accounts = await this.web3.eth.getAccounts()
+            var temp = await this.web3.eth.givenProvider.selectedAddress
+            this.web3.eth.defaultAccount = temp
+            this.setState({address: temp})
+            await this.loadTokenBalance(this.rinkebyToken)
+            await this.loadTokenBalance(this.loom.loomToken)
+            await this.loadGatewayBalance("rinkeby")
+            await this.loadGatewayBalance("extdev")
+
+        } catch (error) {
+            console.error("CAUGHT", error)
+        }
+    }
+
+    loadTokenBalance = async contract => {
+        try {
+
+            let total = await contract.methods.balanceOf(this.state.address).call()
             console.warn("in load token balance, total:", total.toString())
             const tokens = []
             for (let i = 0; i < Math.min(total, 5); i++) {
-                const tokenId = await window.rinkebyToken.methods
+                const tokenId = await contract.methods
                     .tokenOfOwnerByIndex(this.state.address, i)
                     .call()
+                if(tokens.length > 0)
+                    tokens.push(", ")
                 tokens.push(tokenId)
             }
             if (tokens.length !== 0)
@@ -57,15 +79,29 @@ class App extends Component {
         }
     }
 
-    loadGatewayBalance = async event => {
+    loadGatewayBalance = async chain => {
         try {
-            let total = await window.rinkebyToken.methods.balanceOf("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2").call()
+            let contract, address
+            if(chain === "rinkeby") {
+                contract = this.rinkebyToken
+                address = "0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2"
+                // 0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2
+                // 0x2ADf9D1CD5E7D90c135936228dE8118DB912BaFc
+            }
+            else if(chain === "extdev") {
+                contract = this.loom.loomToken
+                address = "0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d"
+                // 0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d
+            }
+            let total = await contract.methods.balanceOf(address).call()
             console.warn("in load Gateway balance, total:", total.toString())
             const tokens = []
             for (let i = 0; i < Math.min(total, 5); i++) {
-                const tokenId = await window.rinkebyToken.methods
-                    .tokenOfOwnerByIndex("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", i)
+                const tokenId = await contract.methods
+                    .tokenOfOwnerByIndex(address, i)
                     .call()
+                if(tokens.length > 0)
+                    tokens.push(", ")
                 tokens.push(tokenId)
             }
             if (tokens.length !== 0)
@@ -74,34 +110,25 @@ class App extends Component {
                 this.setState({ gatewayTokens: "none" })
         }
         catch (error) {
-            console.warn(error)
+            console.warn("loadGatewayBalance Catch:", error)
         }
     }
 
-    componentDidMount = async event => {
-        try {
-            const accounts = await window.web3.eth.getAccounts()
-            console.log(accounts)
-            this.setState({address: accounts[0]})
-            await this.loadTokenBalance()
-            await this.loadGatewayBalance()
-        } catch (error) {
-            console.warn("caught", error)
-        }
-    }
-
-    mintToken = async event => {
-        const tokenId = await window.rinkebyToken.methods.totalSupply().call()
-        const gasEstimate = await window.rinkebyToken.methods.mint(tokenId).estimateGas({ from: this.state.address })
-        await window.rinkebyToken.methods.mint(tokenId).send({ from: this.state.address, gas: gasEstimate })
-        await this.loadTokenBalance()
+    async mintToken() {
+        const tokenId = await this.rinkebyToken.methods.totalSupply().call()
+        console.log(tokenId)
+        const gasEstimate = await this.rinkebyToken.methods.mint(tokenId).estimateGas({ from: this.state.address })
+        console.log(gasEstimate)
+        let tx = await this.rinkebyToken.methods.mint(tokenId).send({ from: this.web3.eth.defaultAccount, gas: gasEstimate })
+        console.log(tx)
+        //await this.loadTokenBalance()
     }
 
     depositToGateway = async event => {
         event.preventDefault()
         let tokenId = event.target.elements[0].value
-        const gasEstimate = await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).estimateGas({ from: this.state.address })
-        await window.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).send({ from: this.state.address, gas: gasEstimate })
+        const gasEstimate = await this.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).estimateGas({ from: this.state.address })
+        await this.rinkebyToken.methods.depositToGateway("0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2", tokenId).send({ from: this.state.address, gas: gasEstimate })
         await this.loadTokenBalance()
     }
 
@@ -144,6 +171,7 @@ class App extends Component {
                 <div>
                     <h1>Loom Network / PlasmaChain</h1>
                     <p>Gateway Balance: {this.state.gatewayTokens}</p>
+                    <p>Extdev Balance: {this.state.extdevTokens}</p>
                 </div>
 
                 <Form onSubmit={e => { e.preventDefault(); }}>
