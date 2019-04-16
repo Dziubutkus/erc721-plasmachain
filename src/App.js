@@ -3,7 +3,8 @@ import './App.css';
 import Contract from './contract'
 import { Button, Form, Input, FormGroup, Container, Row, Col} from 'reactstrap'
 import RinkebyToken from './contracts/MyRinkebyToken.json'
-import Web3 from 'web3'
+//import Web3 from 'web3'
+import web3 from './web3';
 
 class App extends Component {
     constructor(props) {
@@ -25,26 +26,24 @@ class App extends Component {
             gatewayTokens: [],
             extdevTokens: []
         }
+        /*
+        if (typeof this.web3 != 'undefined') {
+            this.web3Provider = this.web3.currentProvider;
+        } else {
+            this.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/aef1483094d34971a33968ea7819f8c1');
+        }
+        this.web3 = new Web3(this.web3Provider);
+*/
 
     }
 
     async componentWillMount() {
         try {
-
-            if (typeof this.web3 != 'undefined') {
-                this.web3Provider = this.web3.currentProvider;
-            } else {
-                this.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/aef1483094d34971a33968ea7819f8c1');
-            }
-            this.web3 = new Web3(this.web3Provider);
-
-            this.rinkebyToken = new this.web3.eth.Contract(RinkebyToken.abi, "0x2ADf9D1CD5E7D90c135936228dE8118DB912BaFc")
+            const accounts = await web3.eth.getAccounts()
+            web3.eth.defaultAccount = accounts[0]
+            this.setState({address: accounts[0]})
+            this.rinkebyToken = new web3.eth.Contract(RinkebyToken.abi, "0x2ADf9D1CD5E7D90c135936228dE8118DB912BaFc")
             await this.loom.loadContract()
-            console.log(this.web3)
-            const accounts = await this.web3.eth.getAccounts()
-            var temp = await this.web3.eth.givenProvider.selectedAddress
-            this.web3.eth.defaultAccount = temp
-            this.setState({address: temp})
             await this.loadTokenBalance(this.rinkebyToken)
             await this.loadTokenBalance(this.loom.loomToken)
             await this.loadGatewayBalance("rinkeby")
@@ -119,7 +118,7 @@ class App extends Component {
         console.log(tokenId)
         const gasEstimate = await this.rinkebyToken.methods.mint(tokenId).estimateGas({ from: this.state.address })
         console.log(gasEstimate)
-        let tx = await this.rinkebyToken.methods.mint(tokenId).send({ from: this.web3.eth.defaultAccount, gas: gasEstimate })
+        let tx = await this.rinkebyToken.methods.mint(tokenId).send({ from: web3.eth.defaultAccount, gas: gasEstimate })
         console.log(tx)
         //await this.loadTokenBalance()
     }
