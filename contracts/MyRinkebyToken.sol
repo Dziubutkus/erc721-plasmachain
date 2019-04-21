@@ -54,7 +54,7 @@ contract MyRinkebyToken is ERC721Full {
         Hero memory _hero = Hero({
             strength: _strength,
             defense: _defense,
-            agility: _agility,
+            agility: _agility
         });
 
         uint256 newHeroId = heroes.push(_hero) - 1;
